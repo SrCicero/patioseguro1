@@ -1,272 +1,249 @@
 <!DOCTYPE html>
-<html lang="pt">
-
+<html lang="pt-BR">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>Mr. C Soluções</title>
+<title>Mr. C Soluções - Sistema Profissional</title>
 
 <style>
-
 body{
-background:#0f1117;
-font-family:Arial;
-color:white;
-text-align:center;
-margin:0;
+  background:#0f1117;
+  font-family:Arial;
+  color:white;
+  margin:0;
 }
 
-h1{
-margin-top:30px;
-}
-
-button{
-width:260px;
-height:70px;
-margin:10px;
-font-size:18px;
-border:none;
-border-radius:12px;
-background:#2563eb;
-color:white;
-}
-
-button:hover{
-background:#1d4ed8;
-}
-
-input,select{
-width:260px;
-height:40px;
-margin:5px;
-border-radius:8px;
-border:none;
-padding:5px;
+header{
+  text-align:center;
+  padding:20px;
+  font-size:24px;
+  font-weight:bold;
 }
 
 .container{
-margin-top:30px;
+  max-width:900px;
+  margin:auto;
+  padding:20px;
+}
+
+input, select, button{
+  width:100%;
+  margin:5px 0;
+  padding:10px;
+  border-radius:8px;
+  border:none;
+}
+
+button{
+  background:#2563eb;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#1d4ed8;
 }
 
 table{
-width:90%;
-margin:auto;
-border-collapse:collapse;
-margin-top:20px;
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
 }
 
-th,td{
-border:1px solid #333;
-padding:10px;
+th, td{
+  border:1px solid #333;
+  padding:8px;
+  text-align:center;
 }
 
 th{
-background:#1f2937;
+  background:#1f2937;
+}
+
+.card{
+  background:#1a1d25;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:20px;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<h1>Mr. C Soluções</h1>
+<header>Mr. C Soluções</header>
 
 <div class="container">
 
-<input id="empresa" placeholder="Empresa atendida">
+<div class="card">
+<h3>Entrada de Veículo</h3>
+<input id="empresa" placeholder="Empresa">
+<input id="cavalo" placeholder="Placa Cavalo">
+<input id="carreta" placeholder="Placa Carreta">
+<input id="motorista" placeholder="Motorista">
 
-<br>
+<select id="tipo">
+<option value="">Tipo</option>
+<option>Cavalo</option>
+<option>Carreta</option>
+<option>Caminhão</option>
+</select>
 
-<button onclick="entrada()">ENTRADA</button>
+<select id="patio">
+<option value="">Pátio</option>
+<option>Interno</option>
+<option>Externo</option>
+</select>
 
-<br>
+<select id="step">
+<option value="">Possui STEP?</option>
+<option>SIM</option>
+<option>NÃO</option>
+</select>
 
-<button onclick="saida()">SAÍDA</button>
+<button onclick="entrada()">Registrar Entrada</button>
+</div>
 
-<br>
+<div class="card">
+<h3>Saída de Veículo</h3>
+<input id="buscar" placeholder="Digite placa">
+<button onclick="saida()">Registrar Saída</button>
+</div>
 
-<button onclick="verPatio()">VER PÁTIO</button>
-
-<br>
-
-<button onclick="relatorio()">RELATÓRIO</button>
-
+<div class="card">
+<button onclick="verPatio()">Ver Pátio</button>
+<button onclick="relatorio()">Relatório</button>
+<button onclick="exportar()">Exportar CSV</button>
 </div>
 
 <div id="tela"></div>
 
+</div>
+
 <script>
 
-let patio = []
+let patio = JSON.parse(localStorage.getItem("patio")) || []
+
+function salvar(){
+  localStorage.setItem("patio", JSON.stringify(patio))
+}
 
 function entrada(){
 
-let placaCavalo = prompt("Placa Cavalo (opcional)").toUpperCase()
-let placaCarreta = prompt("Placa Carreta (opcional)").toUpperCase()
+let empresa = document.getElementById("empresa").value
+let cavalo = document.getElementById("cavalo").value.toUpperCase()
+let carreta = document.getElementById("carreta").value.toUpperCase()
+let motorista = document.getElementById("motorista").value
+let tipo = document.getElementById("tipo").value
+let patioLocal = document.getElementById("patio").value
+let step = document.getElementById("step").value
 
-let motorista = prompt("Nome do motorista")
+if(!empresa || !motorista || !tipo || !patioLocal){
+  alert("Preencha os campos obrigatórios")
+  return
+}
 
-let tipo = prompt("Tipo veículo: cavalo / carreta / caminhão")
+let existe = patio.find(v => 
+(v.cavalo === cavalo || v.carreta === carreta) && v.saida === "")
 
-let patioLocal = prompt("Pátio: interno ou externo")
-
-let step = confirm("Possui STEP?")
-
-let data = new Date()
+if(existe){
+  alert("Veículo já está no pátio")
+  return
+}
 
 let registro = {
-
-empresa:document.getElementById("empresa").value,
-
-placaCavalo:placaCavalo,
-
-placaCarreta:placaCarreta,
-
-motorista:motorista,
-
-tipo:tipo,
-
-patio:patioLocal,
-
-step:step ? "SIM" : "NÃO",
-
-entrada:data.toLocaleString(),
-
+empresa, cavalo, carreta, motorista, tipo, patio:patioLocal, step,
+entrada:new Date().toLocaleString(),
 saida:""
-
 }
 
 patio.push(registro)
-
+salvar()
 alert("Entrada registrada")
-
 }
 
 function saida(){
-
-let placa = prompt("Digite placa do cavalo ou carreta").toUpperCase()
+let placa = document.getElementById("buscar").value.toUpperCase()
 
 let registro = patio.find(v =>
-v.placaCavalo === placa || v.placaCarreta === placa
-)
+v.cavalo === placa || v.carreta === placa)
 
 if(!registro){
-
-alert("Veículo não encontrado")
-
-return
-
+  alert("Não encontrado")
+  return
 }
-
-if(confirm("Confirmar saída do veículo?")){
 
 registro.saida = new Date().toLocaleString()
-
+salvar()
 alert("Saída registrada")
-
-}
-
 }
 
 function verPatio(){
 
-let html = "<h2>Veículos no Pátio</h2>"
-
-html += "<table>"
-
-html += "<tr><th>Cavalo</th><th>Carreta</th><th>Motorista</th><th>Entrada</th></tr>"
+let html = "<h3>Veículos no Pátio</h3><table>"
+html += "<tr><th>Cavalo</th><th>Carreta</th><th>Motorista</th><th>Tempo (h)</th></tr>"
 
 patio.forEach(v => {
-
 if(v.saida === ""){
+let entrada = new Date(v.entrada)
+let horas = Math.floor((new Date() - entrada)/3600000)
 
-html += "<tr>"
-
-html += "<td>"+v.placaCavalo+"</td>"
-
-html += "<td>"+v.placaCarreta+"</td>"
-
-html += "<td>"+v.motorista+"</td>"
-
-html += "<td>"+v.entrada+"</td>"
-
-html += "</tr>"
-
+html += `<tr>
+<td>${v.cavalo}</td>
+<td>${v.carreta}</td>
+<td>${v.motorista}</td>
+<td>${horas}</td>
+</tr>`
 }
-
 })
 
 html += "</table>"
 
 document.getElementById("tela").innerHTML = html
-
 }
 
 function relatorio(){
 
-let html = "<h2>Relatório</h2>"
-
-html += "<table>"
-
-html += "<tr><th>Cavalo</th><th>Carreta</th><th>Motorista</th><th>Tipo</th><th>STEP</th><th>Entrada</th><th>Saída</th></tr>"
+let html = "<h3>Relatório Completo</h3><table>"
+html += "<tr><th>Empresa</th><th>Cavalo</th><th>Carreta</th><th>Motorista</th><th>Tipo</th><th>Pátio</th><th>STEP</th><th>Entrada</th><th>Saída</th></tr>"
 
 patio.forEach(v => {
-
-html += "<tr>"
-
-html += "<td>"+v.placaCavalo+"</td>"
-
-html += "<td>"+v.placaCarreta+"</td>"
-
-html += "<td>"+v.motorista+"</td>"
-
-html += "<td>"+v.tipo+"</td>"
-
-html += "<td>"+v.step+"</td>"
-
-html += "<td>"+v.entrada+"</td>"
-
-html += "<td>"+v.saida+"</td>"
-
-html += "</tr>"
-
+html += `<tr>
+<td>${v.empresa}</td>
+<td>${v.cavalo}</td>
+<td>${v.carreta}</td>
+<td>${v.motorista}</td>
+<td>${v.tipo}</td>
+<td>${v.patio}</td>
+<td>${v.step}</td>
+<td>${v.entrada}</td>
+<td>${v.saida}</td>
+</tr>`
 })
 
 html += "</table>"
 
-html += "<br><button onclick='exportar()'>Exportar Excel</button>"
-
 document.getElementById("tela").innerHTML = html
-
 }
 
 function exportar(){
-
-let csv = "Cavalo,Carreta,Motorista,Tipo,Step,Entrada,Saida\n"
+let csv = "Empresa,Cavalo,Carreta,Motorista,Tipo,Patio,Step,Entrada,Saida\n"
 
 patio.forEach(v => {
-
-csv += `${v.placaCavalo},${v.placaCarreta},${v.motorista},${v.tipo},${v.step},${v.entrada},${v.saida}\n`
-
+csv += `${v.empresa},${v.cavalo},${v.carreta},${v.motorista},${v.tipo},${v.patio},${v.step},${v.entrada},${v.saida}\n`
 })
 
 let blob = new Blob([csv],{type:"text/csv"})
-
 let a = document.createElement("a")
 
 a.href = URL.createObjectURL(blob)
-
 a.download = "relatorio_patio.csv"
-
 a.click()
-
 }
 
 </script>
 
 </body>
-
 </html>
